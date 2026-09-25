@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コード登録</title>
+</head>
+
+<body>
+
+    <h1>SUNABA COFFEE 在庫管理システム</h1>
+
+    <h2>コード登録</h2>
+
+    <form method="POST">
+
+        <p>
+            商品名
+            <input type="text" name="product_name" required>
+        </p>
+
+        <p>
+            単位
+            <input type="text" name="unit" required>
+        </p>
+
+        <p>
+            適正在庫
+            <input type="number" name="ideal_stock" min="0" required>
+        </p>
+
+        <p>
+            現在庫
+            <input type="number" name="stock" min="0" required>
+        </p>
+
+        <button type="submit">登録</button>
+
+    </form>
+
+    <p>
+        <a href="{{ url_for('home') }}">商品在庫状況へ戻る</a>
+    </p>
+
+</body>
+
+</html>

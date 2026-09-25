@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>入出荷管理</title>
+</head>
+
+<body>
+
+    <h1>SUNABA COFFEE 在庫管理システム</h1>
+
+    <h2>入出荷管理</h2>
+
+    <form method="POST">
+
+        <p>
+            商品
+            <select name="product_id">
+                {% for product in products %}
+                <option value="{{ product[0] }}">
+                    {{ product[1] }}
+                </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            処理区分
+            <select name="type">
+                <option value="入荷">入荷</option>
+                <option value="消費">消費</option>
+                <option value="廃棄">廃棄</option>
+            </select>
+        </p>
+
+        <p>
+            数量
+            <input type="number" name="quantity" min="1">
+        </p>
+
+        <button type="submit">登録</button>
+
+    </form>
+
+</body>
+
+</html>
