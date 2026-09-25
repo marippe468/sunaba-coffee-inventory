@@ -13,32 +13,40 @@
 
 <body>
 
-    <header>
-        <h1>SUNABA COFFEE</h1>
-        <p>在庫管理システム</p>
+<div class="app">
+
+    <header class="app-header">
+
+        <div class="header-side">
+            <span class="logo-mark"></span>
+        </div>
+
+        <div class="header-title">
+            <h1>SUNABA COFFEE 在庫管理システム</h1>
+            <p>-SUNABA Inventory Management System(IMS)-</p>
+            <p id="current-date-time"></p>
+        </div>
+
+        <div class="header-side header-setting">
+            ⚙
+        </div>
+
     </header>
 
-    <main>
+
+    <main class="app-main">
 
         <h2>入出荷管理</h2>
 
-        <!-- 画面メニュー -->
-        <nav>
-            <a href="{{ url_for('home') }}">商品在庫状況</a>
-            |
-            <a href="{{ url_for('history') }}">処理履歴</a>
-            |
-            <a href="{{ url_for('product_new') }}">コード登録</a>
-        </nav>
-
-        <!-- 入出荷登録フォーム -->
         <section class="form-card">
 
             <form method="POST">
 
-                <!-- 商品 -->
                 <div class="form-group">
-                    <label for="product_id">商品</label>
+
+                    <label for="product_id">
+                        商品
+                    </label>
 
                     <select id="product_id"
                             name="product_id"
@@ -46,48 +54,65 @@
 
                         {% for product in products %}
 
-                        <option value="{{ product[0] }}">
-                            {{ product[1] }}
-                        </option>
+                            <option value="{{ product[0] }}">
+                                {{ product[1] }}
+                            </option>
 
                         {% endfor %}
 
                     </select>
+
                 </div>
 
 
-                <!-- 処理区分 -->
                 <div class="form-group">
-                    <label for="type">処理区分</label>
+
+                    <label for="type">
+                        処理区分
+                    </label>
 
                     <select id="type"
                             name="type"
                             required>
 
-                        <option value="入荷">入荷</option>
-                        <option value="消費">消費</option>
-                        <option value="廃棄">廃棄</option>
+                        <option value="入荷">
+                            入荷
+                        </option>
+
+                        <option value="消費">
+                            消費
+                        </option>
+
+                        <option value="廃棄">
+                            廃棄
+                        </option>
 
                     </select>
+
                 </div>
 
 
-                <!-- 数量 -->
                 <div class="form-group">
-                    <label for="quantity">数量</label>
+
+                    <label for="quantity">
+                        数量
+                    </label>
 
                     <input type="number"
                            id="quantity"
                            name="quantity"
                            min="1"
+                           placeholder="数量を入力"
                            required>
+
                 </div>
 
 
-                <!-- 登録ボタン -->
                 <button type="submit"
                         class="primary-button">
+
                     登録
+
                 </button>
 
             </form>
@@ -95,6 +120,66 @@
         </section>
 
     </main>
+
+
+    <div class="bottom-area">
+
+        <nav class="bottom-nav">
+
+            <a href="{{ url_for('home') }}">
+                TOP
+            </a>
+
+            <a href="{{ url_for('product_new') }}">
+                商品管理
+            </a>
+
+            <a href="{{ url_for('stock') }}"
+               class="active">
+                入出荷管理
+            </a>
+
+            <a href="{{ url_for('history') }}">
+                履歴管理
+            </a>
+
+        </nav>
+
+
+        <footer class="app-footer">
+
+            <span>@SUNABA COFFEE</span>
+
+            <span class="footer-divider">|</span>
+
+            <span>IMS</span>
+
+        </footer>
+
+    </div>
+
+</div>
+
+
+<script>
+    function updateDateTime() {
+
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hour = String(now.getHours()).padStart(2, "0");
+        const minute = String(now.getMinutes()).padStart(2, "0");
+
+        document.getElementById("current-date-time").textContent =
+            `${year}/${month}/${day} | ${hour}:${minute}`;
+    }
+
+    updateDateTime();
+
+    setInterval(updateDateTime, 60000);
+</script>
 
 </body>
 

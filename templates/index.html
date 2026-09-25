@@ -5,78 +5,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>SUNABA COFFEE 在庫管理システム</title>
+    <title>商品在庫状況 | SUNABA COFFEE</title>
 
-    <!-- CSS -->
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-    <header>
-        <h1>SUNABA COFFEE</h1>
-        <p>在庫管理システム</p>
+<div class="app">
+
+    <!-- ヘッダー -->
+    <header class="app-header">
+
+        <div class="header-side">
+            <span class="logo-mark"></span>
+        </div>
+
+        <div class="header-title">
+            <h1>SUNABA COFFEE 在庫管理システム</h1>
+            <p>-SUNABA Inventory Management System(IMS)-</p>
+            <p id="current-date-time"></p>
+        </div>
+
+        <div class="header-side header-setting">
+            ⚙
+        </div>
+
     </header>
 
-    <main>
+
+    <!-- メイン -->
+    <main class="app-main">
 
         <h2>商品在庫状況</h2>
 
-        <!-- メニュー -->
-        <nav>
-            <a href="{{ url_for('stock') }}">入出荷登録</a>
-            |
-            <a href="{{ url_for('history') }}">処理履歴</a>
-            |
-            <a href="{{ url_for('product_new') }}">コード登録</a>
-        </nav>
+        <section class="table-card">
 
-        <!-- 商品在庫一覧 -->
-        <table>
+            <table>
 
-            <thead>
-                <tr>
-                    <th>商品ID</th>
-                    <th>商品名</th>
-                    <th>現在庫</th>
-                    <th>単位</th>
-                    <th>適正在庫</th>
-                    <th>状態</th>
-                </tr>
-            </thead>
+                <thead>
+                    <tr>
+                        <th>商品名</th>
+                        <th>在庫数</th>
+                        <th>適正在庫</th>
+                        <th>状態</th>
+                    </tr>
+                </thead>
 
-            <tbody>
+                <tbody>
 
                 {% for product in products %}
 
-                <tr>
-                    <td>{{ product[0] }}</td>
-                    <td>{{ product[1] }}</td>
-                    <td>{{ product[2] }}</td>
-                    <td>{{ product[3] }}</td>
-                    <td>{{ product[4] }}</td>
+                    <tr>
 
-                    <td>
-                        {% if product[2] < product[4] %}
-                            <span class="status shortage">
-                                不足
-                            </span>
-                        {% else %}
-                            <span class="status appropriate">
-                                適正
-                            </span>
-                        {% endif %}
-                    </td>
-                </tr>
+                        <td>{{ product[1] }}</td>
+
+                        <td>
+                            {{ product[2] }}{{ product[3] }}
+                        </td>
+
+                        <td>
+                            {{ product[4] }}{{ product[3] }}
+                        </td>
+
+                        <td>
+
+                            {% if product[2] < product[4] %}
+
+                                <span class="status shortage">
+                                    不足
+                                </span>
+
+                            {% else %}
+
+                                <span class="status appropriate">
+                                    適正
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+                        <td colspan="4">
+                            商品が登録されていません
+                        </td>
+                    </tr>
 
                 {% endfor %}
 
-            </tbody>
+                </tbody>
 
-        </table>
+            </table>
+
+        </section>
 
     </main>
+
+
+    <!-- 下部 -->
+    <div class="bottom-area">
+
+        <nav class="bottom-nav">
+
+            <a href="{{ url_for('home') }}"
+               class="active">
+                TOP
+            </a>
+
+            <a href="{{ url_for('product_new') }}">
+                商品管理
+            </a>
+
+            <a href="{{ url_for('stock') }}">
+                入出荷管理
+            </a>
+
+            <a href="{{ url_for('history') }}">
+                履歴管理
+            </a>
+
+        </nav>
+
+
+        <footer class="app-footer">
+
+            <span>@SUNABA COFFEE</span>
+
+            <span class="footer-divider">|</span>
+
+            <span>IMS</span>
+
+        </footer>
+
+    </div>
+
+</div>
+
+
+<script>
+    function updateDateTime() {
+
+        const now = new Date();
+
+        const year = now.getFullYear();
+
+        const month =
+            String(now.getMonth() + 1).padStart(2, "0");
+
+        const day =
+            String(now.getDate()).padStart(2, "0");
+
+        const hour =
+            String(now.getHours()).padStart(2, "0");
+
+        const minute =
+            String(now.getMinutes()).padStart(2, "0");
+
+        document.getElementById("current-date-time").textContent =
+            `${year}/${month}/${day} | ${hour}:${minute}`;
+    }
+
+    updateDateTime();
+
+    setInterval(updateDateTime, 60000);
+</script>
 
 </body>
 

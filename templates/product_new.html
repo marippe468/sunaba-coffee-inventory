@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>コード登録 | SUNABA COFFEE</title>
+    <title>商品管理 | SUNABA COFFEE</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
@@ -13,55 +13,65 @@
 
 <body>
 
-    <header>
-        <h1>SUNABA COFFEE</h1>
-        <p>在庫管理システム</p>
+<div class="app">
+
+    <header class="app-header">
+
+        <div class="header-side">
+            <span class="logo-mark"></span>
+        </div>
+
+        <div class="header-title">
+            <h1>SUNABA COFFEE 在庫管理システム</h1>
+            <p>-SUNABA Inventory Management System(IMS)-</p>
+            <p id="current-date-time"></p>
+        </div>
+
+        <div class="header-side header-setting">
+            ⚙
+        </div>
+
     </header>
 
-    <main>
 
-        <h2>コード登録</h2>
+    <main class="app-main">
 
-        <!-- 画面メニュー -->
-        <nav>
-            <a href="{{ url_for('home') }}">商品在庫状況</a>
-            |
-            <a href="{{ url_for('stock') }}">入出荷登録</a>
-            |
-            <a href="{{ url_for('history') }}">処理履歴</a>
-        </nav>
+        <h2>商品管理</h2>
 
-        <!-- 商品登録フォーム -->
         <section class="form-card">
 
             <form method="POST">
 
-                <!-- 商品名 -->
                 <div class="form-group">
-                    <label for="product_name">商品名</label>
+                    <label for="product_name">
+                        商品名
+                    </label>
 
                     <input type="text"
                            id="product_name"
                            name="product_name"
+                           placeholder="商品名を入力"
                            required>
                 </div>
 
 
-                <!-- 単位 -->
                 <div class="form-group">
-                    <label for="unit">単位</label>
+                    <label for="unit">
+                        単位
+                    </label>
 
                     <input type="text"
                            id="unit"
                            name="unit"
-                           placeholder="例：kg、L、個"
+                           placeholder="kg・L・本・個など"
                            required>
                 </div>
 
 
-                <!-- 適正在庫 -->
                 <div class="form-group">
-                    <label for="ideal_stock">適正在庫</label>
+                    <label for="ideal_stock">
+                        適正在庫
+                    </label>
 
                     <input type="number"
                            id="ideal_stock"
@@ -71,9 +81,10 @@
                 </div>
 
 
-                <!-- 現在庫 -->
                 <div class="form-group">
-                    <label for="stock">現在庫</label>
+                    <label for="stock">
+                        現在庫
+                    </label>
 
                     <input type="number"
                            id="stock"
@@ -83,10 +94,9 @@
                 </div>
 
 
-                <!-- 登録ボタン -->
                 <button type="submit"
                         class="primary-button">
-                    登録
+                    商品を登録
                 </button>
 
             </form>
@@ -94,6 +104,66 @@
         </section>
 
     </main>
+
+
+    <div class="bottom-area">
+
+        <nav class="bottom-nav">
+
+            <a href="{{ url_for('home') }}">
+                TOP
+            </a>
+
+            <a href="{{ url_for('product_new') }}"
+               class="active">
+                商品管理
+            </a>
+
+            <a href="{{ url_for('stock') }}">
+                入出荷管理
+            </a>
+
+            <a href="{{ url_for('history') }}">
+                履歴管理
+            </a>
+
+        </nav>
+
+
+        <footer class="app-footer">
+
+            <span>@SUNABA COFFEE</span>
+
+            <span class="footer-divider">|</span>
+
+            <span>IMS</span>
+
+        </footer>
+
+    </div>
+
+</div>
+
+
+<script>
+    function updateDateTime() {
+
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hour = String(now.getHours()).padStart(2, "0");
+        const minute = String(now.getMinutes()).padStart(2, "0");
+
+        document.getElementById("current-date-time").textContent =
+            `${year}/${month}/${day} | ${hour}:${minute}`;
+    }
+
+    updateDateTime();
+
+    setInterval(updateDateTime, 60000);
+</script>
 
 </body>
 
