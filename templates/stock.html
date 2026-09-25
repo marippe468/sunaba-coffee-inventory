@@ -4,45 +4,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>入出荷管理</title>
+
+    <title>入出荷管理 | SUNABA COFFEE</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-    <h1>SUNABA COFFEE 在庫管理システム</h1>
+    <header>
+        <h1>SUNABA COFFEE</h1>
+        <p>在庫管理システム</p>
+    </header>
 
-    <h2>入出荷管理</h2>
+    <main>
 
-    <form method="POST">
+        <h2>入出荷管理</h2>
 
-        <p>
-            商品
-            <select name="product_id">
-                {% for product in products %}
-                <option value="{{ product[0] }}">
-                    {{ product[1] }}
-                </option>
-                {% endfor %}
-            </select>
-        </p>
+        <!-- 画面メニュー -->
+        <nav>
+            <a href="{{ url_for('home') }}">商品在庫状況</a>
+            |
+            <a href="{{ url_for('history') }}">処理履歴</a>
+            |
+            <a href="{{ url_for('product_new') }}">コード登録</a>
+        </nav>
 
-        <p>
-            処理区分
-            <select name="type">
-                <option value="入荷">入荷</option>
-                <option value="消費">消費</option>
-                <option value="廃棄">廃棄</option>
-            </select>
-        </p>
+        <!-- 入出荷登録フォーム -->
+        <section class="form-card">
 
-        <p>
-            数量
-            <input type="number" name="quantity" min="1">
-        </p>
+            <form method="POST">
 
-        <button type="submit">登録</button>
+                <!-- 商品 -->
+                <div class="form-group">
+                    <label for="product_id">商品</label>
 
-    </form>
+                    <select id="product_id"
+                            name="product_id"
+                            required>
+
+                        {% for product in products %}
+
+                        <option value="{{ product[0] }}">
+                            {{ product[1] }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <!-- 処理区分 -->
+                <div class="form-group">
+                    <label for="type">処理区分</label>
+
+                    <select id="type"
+                            name="type"
+                            required>
+
+                        <option value="入荷">入荷</option>
+                        <option value="消費">消費</option>
+                        <option value="廃棄">廃棄</option>
+
+                    </select>
+                </div>
+
+
+                <!-- 数量 -->
+                <div class="form-group">
+                    <label for="quantity">数量</label>
+
+                    <input type="number"
+                           id="quantity"
+                           name="quantity"
+                           min="1"
+                           required>
+                </div>
+
+
+                <!-- 登録ボタン -->
+                <button type="submit"
+                        class="primary-button">
+                    登録
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
 
 </body>
 

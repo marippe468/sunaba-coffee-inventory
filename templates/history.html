@@ -4,37 +4,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>処理履歴</title>
+
+    <title>処理履歴 | SUNABA COFFEE</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-    <h1>SUNABA COFFEE 在庫管理システム</h1>
+    <header>
+        <h1>SUNABA COFFEE</h1>
+        <p>在庫管理システム</p>
+    </header>
 
-    <h2>処理履歴</h2>
+    <main>
 
-    <p>
-        <a href="{{ url_for('home') }}">商品在庫状況へ戻る</a>
-    </p>
+        <h2>処理履歴</h2>
 
-    <table border="1">
-        <tr>
-            <th>日時</th>
-            <th>商品名</th>
-            <th>処理区分</th>
-            <th>数量</th>
-        </tr>
+        <!-- 画面メニュー -->
+        <nav>
+            <a href="{{ url_for('home') }}">商品在庫状況</a>
+            |
+            <a href="{{ url_for('stock') }}">入出荷登録</a>
+            |
+            <a href="{{ url_for('product_new') }}">コード登録</a>
+        </nav>
 
-        {% for transaction in transactions %}
-        <tr>
-            <td>{{ transaction[1] }}</td>
-            <td>{{ transaction[2] }}</td>
-            <td>{{ transaction[3] }}</td>
-            <td>{{ transaction[4] }} {{ transaction[5] }}</td>
-        </tr>
-        {% endfor %}
+        <!-- 処理履歴一覧 -->
+        <table>
 
-    </table>
+            <thead>
+                <tr>
+                    <th>日時</th>
+                    <th>商品名</th>
+                    <th>処理区分</th>
+                    <th>数量</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for transaction in transactions %}
+
+                <tr>
+                    <td>{{ transaction[1] }}</td>
+                    <td>{{ transaction[2] }}</td>
+                    <td>{{ transaction[3] }}</td>
+                    <td>
+                        {{ transaction[4] }}
+                        {{ transaction[5] }}
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </main>
 
 </body>
 
