@@ -1,13 +1,9 @@
-# Python 仮想環境
 .venv/
-
-# Python キャッシュ
 __pycache__/
 *.pyc
 
-# SQLite データベース
 *.db
+!sunaba_coffee.db
 
-# OS
 .DS_Store
 Thumbs.db
