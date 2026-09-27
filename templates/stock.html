@@ -1,186 +1,158 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>入出荷管理 | SUNABA COFFEE</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入出荷管理 | SUNABA COFFEE</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
 <div class="app">
 
-    <header class="app-header">
+<header class="app-header">
+  <div class="header-side"><span class="logo-mark"></span></div>
+  <div class="header-title">
+    <h1>SUNABA COFFEE 在庫管理システム</h1>
+    <p>-SUNABA Inventory Management System(IMS)-</p>
+    <p id="current-date-time"></p>
+  </div>
+  <div class="header-side header-setting">
+    <details class="setting-menu">
+      <summary aria-label="設定">⚙</summary>
+      <div class="setting-panel">
+        <span>{{ session.get("employee_name", "") }}</span>
+        <a href="{{ url_for('product_new') }}">商品登録</a>
+        <a href="{{ url_for('logout') }}">ログアウト</a>
+      </div>
+    </details>
+  </div>
+</header>
 
-        <div class="header-side">
-            <span class="logo-mark"></span>
+
+<main class="app-main">
+  <h2>入出荷管理</h2>
+  
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
+  {% if confirmation %}
+  <section class="form-card confirmation-card">
+    <h3>登録内容の確認</h3>
+    <p><strong>商品：</strong>{{ confirmation.product_name }}</p>
+    <p><strong>処理：</strong>{{ confirmation.process_name }}</p>
+    <p><strong>数量：</strong>{{ confirmation.quantity }}{{ confirmation.unit }}</p>
+    <p><strong>登録者：</strong>{{ confirmation.employee_name }}</p>
+    <form method="POST">
+      <input type="hidden" name="product_id" value="{{ confirmation.product_id }}">
+      <input type="hidden" name="process_code" value="{{ confirmation.process_code }}">
+      <input type="hidden" name="quantity" value="{{ confirmation.quantity }}">
+      <input type="hidden" name="confirmed" value="1">
+      <button class="primary-button" type="submit">この内容で登録</button>
+      <a class="secondary-button button-link" href="{{ url_for('stock', product_id=confirmation.product_id) }}">戻る</a>
+    </form>
+  </section>
+  {% else %}
+  <section class="form-card">
+    <form method="POST">
+      <div class="form-group">
+        <label for="product_id">商品</label>
+        <select id="product_id" name="product_id" required>
+          {% for product in products %}
+          <option value="{{ product['product_id'] }}" {{ 'selected' if selected_product_id == product['product_id'] else '' }}>
+            {{ product["product_name"] }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>処理区分</label>
+        <div class="process-buttons">
+          {% for process in visible_processes %}
+            <label class="process-choice">
+              <input type="radio" name="process_code" value="{{ process['process_code'] }}" required>
+              <span>{{ process["process_name"] }}</span>
+            </label>
+          {% endfor %}
         </div>
+      </div>
 
-        <div class="header-title">
-            <h1>SUNABA COFFEE 在庫管理システム</h1>
-            <p>-SUNABA Inventory Management System(IMS)-</p>
-            <p id="current-date-time"></p>
+      {% if hidden_processes %}
+      <details class="optional-process">
+        <summary>＋ 処理区分を追加</summary>
+        <div class="optional-list">
+        {% for process in hidden_processes %}
+          <button type="submit" form="toggle-{{ process['process_code'] }}" class="small-button">＋ {{ process["process_name"] }}</button>
+        {% endfor %}
         </div>
+      </details>
+      {% endif %}
 
-        <div class="header-side header-setting">
-            ⚙
+      {% set removable = visible_processes | selectattr("process_code", "in", ["RT","AD","DM"]) | list %}
+      {% if removable %}
+      <details class="optional-process">
+        <summary>追加区分を非表示</summary>
+        <div class="optional-list">
+        {% for process in removable %}
+          <button type="submit" form="toggle-{{ process['process_code'] }}" class="small-button">− {{ process["process_name"] }}</button>
+        {% endfor %}
         </div>
+      </details>
+      {% endif %}
 
-    </header>
+      <div class="form-group">
+        <label for="quantity">数量 <span class="hint">（棚卸調整は棚卸後の実在庫）</span></label>
+        <input type="number" id="quantity" name="quantity" min="1" placeholder="数量を入力" required>
+      </div>
+      <p class="registrant">登録者：{{ session.get("employee_name") }}</p>
+      <button type="submit" class="primary-button">登録内容を確認</button>
+    </form>
 
+    {% for process in hidden_processes %}
+    <form id="toggle-{{ process['process_code'] }}" method="POST" action="{{ url_for('toggle_process_type', process_code=process['process_code']) }}"></form>
+    {% endfor %}
+    {% for process in visible_processes %}
+      {% if process["process_code"] in ["RT","AD","DM"] %}
+      <form id="toggle-{{ process['process_code'] }}" method="POST" action="{{ url_for('toggle_process_type', process_code=process['process_code']) }}"></form>
+      {% endif %}
+    {% endfor %}
+  </section>
+  {% endif %}
+</main>
 
-    <main class="app-main">
+{% set active = "stock" %}
 
-        <h2>入出荷管理</h2>
-
-        <section class="form-card">
-
-            <form method="POST">
-
-                <div class="form-group">
-
-                    <label for="product_id">
-                        商品
-                    </label>
-
-                    <select id="product_id"
-                            name="product_id"
-                            required>
-
-                        {% for product in products %}
-
-                            <option value="{{ product[0] }}">
-                                {{ product[1] }}
-                            </option>
-
-                        {% endfor %}
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="type">
-                        処理区分
-                    </label>
-
-                    <select id="type"
-                            name="type"
-                            required>
-
-                        <option value="入荷">
-                            入荷
-                        </option>
-
-                        <option value="消費">
-                            消費
-                        </option>
-
-                        <option value="廃棄">
-                            廃棄
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="quantity">
-                        数量
-                    </label>
-
-                    <input type="number"
-                           id="quantity"
-                           name="quantity"
-                           min="1"
-                           placeholder="数量を入力"
-                           required>
-
-                </div>
-
-
-                <button type="submit"
-                        class="primary-button">
-
-                    登録
-
-                </button>
-
-            </form>
-
-        </section>
-
-    </main>
-
-
-    <div class="bottom-area">
-
-        <nav class="bottom-nav">
-
-            <a href="{{ url_for('home') }}">
-                TOP
-            </a>
-
-            <a href="{{ url_for('product_new') }}">
-                商品管理
-            </a>
-
-            <a href="{{ url_for('stock') }}"
-               class="active">
-                入出荷管理
-            </a>
-
-            <a href="{{ url_for('history') }}">
-                履歴管理
-            </a>
-
-        </nav>
-
-
-        <footer class="app-footer">
-
-            <span>@SUNABA COFFEE</span>
-
-            <span class="footer-divider">|</span>
-
-            <span>IMS</span>
-
-        </footer>
-
-    </div>
+<div class="bottom-area">
+  <nav class="bottom-nav">
+    <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'home' else '' }}">TOP</a>
+    <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'detail' else '' }}">商品詳細</a>
+    <a href="{{ url_for('stock') }}" class="{{ 'active' if active == 'stock' else '' }}">入出荷管理</a>
+    <a href="{{ url_for('history') }}" class="{{ 'active' if active == 'history' else '' }}">履歴管理</a>
+  </nav>
+  <footer class="app-footer">
+    <span>@SUNABA COFFEE</span><span class="footer-divider">|</span><span>IMS</span>
+  </footer>
+</div>
 
 </div>
 
-
 <script>
-    function updateDateTime() {
-
-        const now = new Date();
-
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        const hour = String(now.getHours()).padStart(2, "0");
-        const minute = String(now.getMinutes()).padStart(2, "0");
-
-        document.getElementById("current-date-time").textContent =
-            `${year}/${month}/${day} | ${hour}:${minute}`;
-    }
-
-    updateDateTime();
-
-    setInterval(updateDateTime, 60000);
+function updateDateTime() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,"0");
+  const d = String(now.getDate()).padStart(2,"0");
+  const h = String(now.getHours()).padStart(2,"0");
+  const min = String(now.getMinutes()).padStart(2,"0");
+  const el = document.getElementById("current-date-time");
+  if (el) el.textContent = `${y}/${m}/${d} | ${h}:${min}`;
+}
+updateDateTime();
+setInterval(updateDateTime, 60000);
 </script>
 
 </body>
-
 </html>

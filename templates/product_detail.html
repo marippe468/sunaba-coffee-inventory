@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>商品登録 | SUNABA COFFEE</title>
+<title>商品詳細 | SUNABA COFFEE</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -30,26 +30,25 @@
 
 
 <main class="app-main">
-  <h2>商品登録</h2>
-  
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% for category, message in messages %}
-    <div class="flash {{ category }}">{{ message }}</div>
-  {% endfor %}
-{% endwith %}
-
-  <section class="form-card">
-    <form method="POST">
-      <div class="form-group"><label for="product_name">商品名</label><input type="text" id="product_name" name="product_name" required></div>
-      <div class="form-group"><label for="unit">単位</label><input type="text" id="unit" name="unit" placeholder="kg・L・本・個など" required></div>
-      <div class="form-group"><label for="ideal_stock">適正在庫</label><input type="number" id="ideal_stock" name="ideal_stock" min="0" required></div>
-      <div class="form-group"><label for="stock">現在庫</label><input type="number" id="stock" name="stock" min="0" required></div>
-      <button class="primary-button" type="submit">商品を登録</button>
-    </form>
+  <h2>商品詳細</h2>
+  <section class="detail-card">
+    <dl class="detail-list">
+      <div><dt>商品ID</dt><dd>{{ product["product_id"] }}</dd></div>
+      <div><dt>商品名</dt><dd>{{ product["product_name"] }}</dd></div>
+      <div><dt>単位</dt><dd>{{ product["unit"] }}</dd></div>
+      <div><dt>現在庫</dt><dd>{{ product["stock"] }}{{ product["unit"] }}</dd></div>
+      <div><dt>適正在庫</dt><dd>{{ product["ideal_stock"] }}{{ product["unit"] }}</dd></div>
+      <div><dt>状態</dt><dd>
+        {% if product["stock"] < product["ideal_stock"] %}
+          <span class="status shortage">不足 {{ product["ideal_stock"] - product["stock"] }}{{ product["unit"] }}</span>
+        {% else %}<span class="status appropriate">適正</span>{% endif %}
+      </dd></div>
+    </dl>
+    <a class="primary-button button-link" href="{{ url_for('stock', product_id=product['product_id']) }}">この商品の入出荷を登録</a>
   </section>
 </main>
 
-{% set active = "" %}
+{% set active = "detail" %}
 
 <div class="bottom-area">
   <nav class="bottom-nav">

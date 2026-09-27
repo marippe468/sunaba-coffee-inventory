@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>商品登録 | SUNABA COFFEE</title>
+<title>履歴詳細 | SUNABA COFFEE</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -30,7 +30,7 @@
 
 
 <main class="app-main">
-  <h2>商品登録</h2>
+  <h2>履歴詳細</h2>
   
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% for category, message in messages %}
@@ -38,18 +38,33 @@
   {% endfor %}
 {% endwith %}
 
-  <section class="form-card">
-    <form method="POST">
-      <div class="form-group"><label for="product_name">商品名</label><input type="text" id="product_name" name="product_name" required></div>
-      <div class="form-group"><label for="unit">単位</label><input type="text" id="unit" name="unit" placeholder="kg・L・本・個など" required></div>
-      <div class="form-group"><label for="ideal_stock">適正在庫</label><input type="number" id="ideal_stock" name="ideal_stock" min="0" required></div>
-      <div class="form-group"><label for="stock">現在庫</label><input type="number" id="stock" name="stock" min="0" required></div>
-      <button class="primary-button" type="submit">商品を登録</button>
-    </form>
+  <section class="detail-card">
+    <dl class="detail-list">
+      <div><dt>日時</dt><dd>{{ transaction["created_at"] }}</dd></div>
+      <div><dt>商品</dt><dd>{{ transaction["product_name"] }}</dd></div>
+      <div><dt>区分</dt><dd>{{ transaction["process_type"] }}</dd></div>
+      <div><dt>数量</dt><dd>{{ transaction["quantity"] }}{{ transaction["unit"] }}</dd></div>
+      <div><dt>登録者</dt><dd>{{ transaction["employee_name"] }}</dd></div>
+    </dl>
+    <a class="primary-button button-link" href="{{ url_for('history_edit', transaction_id=transaction['transaction_id']) }}">訂正</a>
+    <a class="secondary-button button-link" href="{{ url_for('history') }}">履歴一覧へ戻る</a>
   </section>
+
+  {% if corrections %}
+  <section class="detail-card correction-history">
+    <h3>訂正履歴</h3>
+    {% for c in corrections %}
+      <div class="correction-item">
+        <p>{{ c["corrected_at"] }} / {{ c["employee_name"] or c["corrected_by"] }}</p>
+        <p>{{ c["old_quantity"] }} → {{ c["new_quantity"] }}{{ transaction["unit"] }}</p>
+        <p>理由：{{ c["reason"] }}</p>
+      </div>
+    {% endfor %}
+  </section>
+  {% endif %}
 </main>
 
-{% set active = "" %}
+{% set active = "history" %}
 
 <div class="bottom-area">
   <nav class="bottom-nav">

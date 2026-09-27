@@ -1,184 +1,109 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>履歴管理 | SUNABA COFFEE</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>履歴管理 | SUNABA COFFEE</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
 <div class="app">
 
-    <header class="app-header">
-
-        <div class="header-side">
-            <span class="logo-mark"></span>
-        </div>
-
-        <div class="header-title">
-            <h1>SUNABA COFFEE 在庫管理システム</h1>
-            <p>-SUNABA Inventory Management System(IMS)-</p>
-            <p id="current-date-time"></p>
-        </div>
-
-        <div class="header-side header-setting">
-            ⚙
-        </div>
-
-    </header>
-
-
-    <main class="app-main">
-
-        <h2>履歴管理</h2>
-
-        <section class="table-card">
-
-            <div class="history-scroll">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>日時</th>
-                            <th>商品名</th>
-                            <th>区分</th>
-                            <th>数量</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                    {% for transaction in transactions %}
-
-                        <tr>
-
-                            <td>
-                                {{ transaction[1] }}
-                            </td>
-
-                            <td>
-                                {{ transaction[2] }}
-                            </td>
-
-                            <td>
-
-                                {% if transaction[3] == "入荷" %}
-
-                                    <span class="process incoming">
-                                        入荷
-                                    </span>
-
-                                {% elif transaction[3] == "消費" %}
-
-                                    <span class="process outgoing">
-                                        消費
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="process disposal">
-                                        廃棄
-                                    </span>
-
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-                                {{ transaction[4] }}{{ transaction[5] }}
-                            </td>
-
-                        </tr>
-
-                    {% else %}
-
-                        <tr>
-                            <td colspan="4">
-                                履歴はありません
-                            </td>
-                        </tr>
-
-                    {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
-
-    </main>
+<header class="app-header">
+  <div class="header-side"><span class="logo-mark"></span></div>
+  <div class="header-title">
+    <h1>SUNABA COFFEE 在庫管理システム</h1>
+    <p>-SUNABA Inventory Management System(IMS)-</p>
+    <p id="current-date-time"></p>
+  </div>
+  <div class="header-side header-setting">
+    <details class="setting-menu">
+      <summary aria-label="設定">⚙</summary>
+      <div class="setting-panel">
+        <span>{{ session.get("employee_name", "") }}</span>
+        <a href="{{ url_for('product_new') }}">商品登録</a>
+        <a href="{{ url_for('logout') }}">ログアウト</a>
+      </div>
+    </details>
+  </div>
+</header>
 
 
-    <div class="bottom-area">
+<main class="app-main">
+  <h2>履歴管理</h2>
+  
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
 
-        <nav class="bottom-nav">
+  <details class="filter-card" {% if filters.date_from or filters.date_to or filters.product_id or filters.process_type or filters.employee_id %}open{% endif %}>
+    <summary>絞り込み ▼</summary>
+    <form method="GET">
+      <div class="filter-grid">
+        <div class="form-group"><label>開始日</label><input type="date" name="date_from" value="{{ filters.date_from }}"></div>
+        <div class="form-group"><label>終了日</label><input type="date" name="date_to" value="{{ filters.date_to }}"></div>
+        <div class="form-group"><label>商品</label><select name="product_id"><option value="">すべて</option>{% for p in products %}<option value="{{ p['product_id'] }}" {{ 'selected' if filters.product_id == p['product_id']|string else '' }}>{{ p["product_name"] }}</option>{% endfor %}</select></div>
+        <div class="form-group"><label>区分</label><select name="process_type"><option value="">すべて</option>{% for p in process_types %}<option value="{{ p['process_name'] }}" {{ 'selected' if filters.process_type == p['process_name'] else '' }}>{{ p["process_name"] }}</option>{% endfor %}</select></div>
+        <div class="form-group"><label>登録者</label><select name="employee_id"><option value="">すべて</option>{% for e in employees %}<option value="{{ e['employee_id'] }}" {{ 'selected' if filters.employee_id == e['employee_id'] else '' }}>{{ e["employee_name"] }}</option>{% endfor %}</select></div>
+      </div>
+      <button class="primary-button" type="submit">検索</button>
+      <a class="secondary-button button-link" href="{{ url_for('history') }}">条件をクリア</a>
+    </form>
+  </details>
 
-            <a href="{{ url_for('home') }}">
-                TOP
-            </a>
-
-            <a href="{{ url_for('product_new') }}">
-                商品管理
-            </a>
-
-            <a href="{{ url_for('stock') }}">
-                入出荷管理
-            </a>
-
-            <a href="{{ url_for('history') }}"
-               class="active">
-                履歴管理
-            </a>
-
-        </nav>
-
-
-        <footer class="app-footer">
-
-            <span>@SUNABA COFFEE</span>
-
-            <span class="footer-divider">|</span>
-
-            <span>IMS</span>
-
-        </footer>
-
+  <section class="table-card">
+    <div class="history-scroll">
+      <table>
+        <thead><tr><th>日時</th><th>商品名</th><th>区分</th><th>数量</th></tr></thead>
+        <tbody>
+        {% for t in transactions %}
+          <tr class="clickable-row" onclick="location.href='{{ url_for('history_detail', transaction_id=t['transaction_id']) }}'">
+            <td>{{ t["created_at"] }}</td>
+            <td>{{ t["product_name"] }}</td>
+            <td><span class="process">{{ t["process_type"] }}</span></td>
+            <td>{{ t["quantity"] }}{{ t["unit"] }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4">履歴はありません</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </section>
+</main>
+
+{% set active = "history" %}
+
+<div class="bottom-area">
+  <nav class="bottom-nav">
+    <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'home' else '' }}">TOP</a>
+    <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'detail' else '' }}">商品詳細</a>
+    <a href="{{ url_for('stock') }}" class="{{ 'active' if active == 'stock' else '' }}">入出荷管理</a>
+    <a href="{{ url_for('history') }}" class="{{ 'active' if active == 'history' else '' }}">履歴管理</a>
+  </nav>
+  <footer class="app-footer">
+    <span>@SUNABA COFFEE</span><span class="footer-divider">|</span><span>IMS</span>
+  </footer>
+</div>
 
 </div>
 
-
 <script>
-    function updateDateTime() {
-
-        const now = new Date();
-
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        const hour = String(now.getHours()).padStart(2, "0");
-        const minute = String(now.getMinutes()).padStart(2, "0");
-
-        document.getElementById("current-date-time").textContent =
-            `${year}/${month}/${day} | ${hour}:${minute}`;
-    }
-
-    updateDateTime();
-
-    setInterval(updateDateTime, 60000);
+function updateDateTime() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,"0");
+  const d = String(now.getDate()).padStart(2,"0");
+  const h = String(now.getHours()).padStart(2,"0");
+  const min = String(now.getMinutes()).padStart(2,"0");
+  const el = document.getElementById("current-date-time");
+  if (el) el.textContent = `${y}/${m}/${d} | ${h}:${min}`;
+}
+updateDateTime();
+setInterval(updateDateTime, 60000);
 </script>
 
 </body>
-
 </html>

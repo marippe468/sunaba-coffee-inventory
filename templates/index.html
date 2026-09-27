@@ -1,181 +1,98 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>商品在庫状況 | SUNABA COFFEE</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品在庫状況 | SUNABA COFFEE</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
 <div class="app">
 
-    <!-- ヘッダー -->
-    <header class="app-header">
-
-        <div class="header-side">
-            <span class="logo-mark"></span>
-        </div>
-
-        <div class="header-title">
-            <h1>SUNABA COFFEE 在庫管理システム</h1>
-            <p>-SUNABA Inventory Management System(IMS)-</p>
-            <p id="current-date-time"></p>
-        </div>
-
-        <div class="header-side header-setting">
-            ⚙
-        </div>
-
-    </header>
-
-
-    <!-- メイン -->
-    <main class="app-main">
-
-        <h2>商品在庫状況</h2>
-
-        <section class="table-card">
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>商品名</th>
-                        <th>在庫数</th>
-                        <th>適正在庫</th>
-                        <th>状態</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                {% for product in products %}
-
-                    <tr>
-
-                        <td>{{ product[1] }}</td>
-
-                        <td>
-                            {{ product[2] }}{{ product[3] }}
-                        </td>
-
-                        <td>
-                            {{ product[4] }}{{ product[3] }}
-                        </td>
-
-                        <td>
-
-                            {% if product[2] < product[4] %}
-
-                                <span class="status shortage">
-                                    不足
-                                </span>
-
-                            {% else %}
-
-                                <span class="status appropriate">
-                                    適正
-                                </span>
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                {% else %}
-
-                    <tr>
-                        <td colspan="4">
-                            商品が登録されていません
-                        </td>
-                    </tr>
-
-                {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </section>
-
-    </main>
+<header class="app-header">
+  <div class="header-side"><span class="logo-mark"></span></div>
+  <div class="header-title">
+    <h1>SUNABA COFFEE 在庫管理システム</h1>
+    <p>-SUNABA Inventory Management System(IMS)-</p>
+    <p id="current-date-time"></p>
+  </div>
+  <div class="header-side header-setting">
+    <details class="setting-menu">
+      <summary aria-label="設定">⚙</summary>
+      <div class="setting-panel">
+        <span>{{ session.get("employee_name", "") }}</span>
+        <a href="{{ url_for('product_new') }}">商品登録</a>
+        <a href="{{ url_for('logout') }}">ログアウト</a>
+      </div>
+    </details>
+  </div>
+</header>
 
 
-    <!-- 下部 -->
-    <div class="bottom-area">
+<main class="app-main">
+  <h2>商品在庫状況</h2>
+  
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
 
-        <nav class="bottom-nav">
+  <section class="table-card">
+    <table>
+      <thead><tr><th>商品名</th><th>在庫数</th><th>適正在庫</th><th>状態</th></tr></thead>
+      <tbody>
+      {% for product in products %}
+        <tr>
+          <td><a class="product-link" href="{{ url_for('product_detail', product_id=product['product_id']) }}">{{ product["product_name"] }} 〉</a></td>
+          <td>{{ product["stock"] }}{{ product["unit"] }}</td>
+          <td>{{ product["ideal_stock"] }}{{ product["unit"] }}</td>
+          <td>
+          {% if product["stock"] < product["ideal_stock"] %}
+            <span class="status shortage">不足 {{ product["ideal_stock"] - product["stock"] }}{{ product["unit"] }}</span>
+          {% else %}
+            <span class="status appropriate">適正</span>
+          {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">商品が登録されていません</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</main>
 
-            <a href="{{ url_for('home') }}"
-               class="active">
-                TOP
-            </a>
+{% set active = "home" %}
 
-            <a href="{{ url_for('product_new') }}">
-                商品管理
-            </a>
-
-            <a href="{{ url_for('stock') }}">
-                入出荷管理
-            </a>
-
-            <a href="{{ url_for('history') }}">
-                履歴管理
-            </a>
-
-        </nav>
-
-
-        <footer class="app-footer">
-
-            <span>@SUNABA COFFEE</span>
-
-            <span class="footer-divider">|</span>
-
-            <span>IMS</span>
-
-        </footer>
-
-    </div>
+<div class="bottom-area">
+  <nav class="bottom-nav">
+    <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'home' else '' }}">TOP</a>
+    <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'detail' else '' }}">商品詳細</a>
+    <a href="{{ url_for('stock') }}" class="{{ 'active' if active == 'stock' else '' }}">入出荷管理</a>
+    <a href="{{ url_for('history') }}" class="{{ 'active' if active == 'history' else '' }}">履歴管理</a>
+  </nav>
+  <footer class="app-footer">
+    <span>@SUNABA COFFEE</span><span class="footer-divider">|</span><span>IMS</span>
+  </footer>
+</div>
 
 </div>
 
-
 <script>
-    function updateDateTime() {
-
-        const now = new Date();
-
-        const year = now.getFullYear();
-
-        const month =
-            String(now.getMonth() + 1).padStart(2, "0");
-
-        const day =
-            String(now.getDate()).padStart(2, "0");
-
-        const hour =
-            String(now.getHours()).padStart(2, "0");
-
-        const minute =
-            String(now.getMinutes()).padStart(2, "0");
-
-        document.getElementById("current-date-time").textContent =
-            `${year}/${month}/${day} | ${hour}:${minute}`;
-    }
-
-    updateDateTime();
-
-    setInterval(updateDateTime, 60000);
+function updateDateTime() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,"0");
+  const d = String(now.getDate()).padStart(2,"0");
+  const h = String(now.getHours()).padStart(2,"0");
+  const min = String(now.getMinutes()).padStart(2,"0");
+  const el = document.getElementById("current-date-time");
+  if (el) el.textContent = `${y}/${m}/${d} | ${h}:${min}`;
+}
+updateDateTime();
+setInterval(updateDateTime, 60000);
 </script>
 
 </body>
-
 </html>

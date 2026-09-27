@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>商品登録 | SUNABA COFFEE</title>
+<title>履歴訂正 | SUNABA COFFEE</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -30,7 +30,7 @@
 
 
 <main class="app-main">
-  <h2>商品登録</h2>
+  <h2>履歴訂正</h2>
   
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% for category, message in messages %}
@@ -39,17 +39,24 @@
 {% endwith %}
 
   <section class="form-card">
+    <p><strong>{{ transaction["product_name"] }}</strong> / {{ transaction["process_type"] }}</p>
+    <p>現在の記録：{{ transaction["quantity"] }}{{ transaction["unit"] }}</p>
     <form method="POST">
-      <div class="form-group"><label for="product_name">商品名</label><input type="text" id="product_name" name="product_name" required></div>
-      <div class="form-group"><label for="unit">単位</label><input type="text" id="unit" name="unit" placeholder="kg・L・本・個など" required></div>
-      <div class="form-group"><label for="ideal_stock">適正在庫</label><input type="number" id="ideal_stock" name="ideal_stock" min="0" required></div>
-      <div class="form-group"><label for="stock">現在庫</label><input type="number" id="stock" name="stock" min="0" required></div>
-      <button class="primary-button" type="submit">商品を登録</button>
+      <div class="form-group">
+        <label for="quantity">訂正後の数量</label>
+        <input id="quantity" type="number" name="quantity" min="1" value="{{ transaction['quantity'] }}" required>
+      </div>
+      <div class="form-group">
+        <label for="reason">訂正理由</label>
+        <input id="reason" type="text" name="reason" placeholder="例：入力ミス" required>
+      </div>
+      <button class="primary-button" type="submit">訂正を確定</button>
+      <a class="secondary-button button-link" href="{{ url_for('history_detail', transaction_id=transaction['transaction_id']) }}">キャンセル</a>
     </form>
   </section>
 </main>
 
-{% set active = "" %}
+{% set active = "history" %}
 
 <div class="bottom-area">
   <nav class="bottom-nav">

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ログイン | SUNABA COFFEE</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app login-app">
+  <header class="app-header login-header">
+    <div class="header-side"><span class="logo-mark"></span></div>
+    <div class="header-title">
+      <h1>SUNABA COFFEE 在庫管理システム</h1>
+      <p>-SUNABA Inventory Management System(IMS)-</p>
+    </div>
+    <div class="header-side"></div>
+  </header>
+  <main class="app-main login-main">
+    <h2>ログイン</h2>
+    
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
+    <section class="form-card">
+      <form method="POST">
+        <div class="form-group"><label for="employee_id">従業員ID</label><input id="employee_id" name="employee_id" autocomplete="username" required></div>
+        <div class="form-group"><label for="password">パスワード</label><input id="password" type="password" name="password" autocomplete="current-password" required></div>
+        <button class="primary-button" type="submit">ログイン</button>
+      </form>
+    </section>
+  </main>
+  <div class="bottom-area"><footer class="app-footer"><span>@SUNABA COFFEE</span><span class="footer-divider">|</span><span>IMS</span></footer></div>
+</div>
+</body>
+</html>
