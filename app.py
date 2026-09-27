@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
+import re
+import secrets
 from functools import wraps
 from datetime import datetime
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = "sunaba-coffee-change-this-secret-key"
@@ -24,6 +26,18 @@ def login_required(view):
     return wrapped_view
 
 
+def admin_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if "employee_id" not in session:
+            return redirect(url_for("login"))
+        if session.get("role") != "admin":
+            flash("管理者のみ利用できます。", "error")
+            return redirect(url_for("home"))
+        return view(*args, **kwargs)
+    return wrapped_view
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if "employee_id" in session:
@@ -32,6 +46,11 @@ def login():
     if request.method == "POST":
         employee_id = request.form["employee_id"].strip()
         password = request.form["password"]
+
+        # 従業員ID・パスワードは半角英数字のみ受け付ける
+        if not re.fullmatch(r"[A-Za-z0-9]+", employee_id) or not re.fullmatch(r"[A-Za-z0-9]+", password):
+            flash("従業員IDとパスワードは半角英数字で入力してください。", "error")
+            return render_template("login.html")
 
         conn = get_db()
         employee = conn.execute(
@@ -54,9 +73,52 @@ def login():
 
 @app.route("/logout")
 def logout():
+    employee_name = session.get("employee_name", "")
+    month = datetime.now().month
+
+    if month in (3, 4, 5):
+        seasonal_messages = [
+            "春のやわらかな風が心地よい季節ですね。",
+            "新緑がきれいな季節になりました。",
+            "春の日差しにほっとする季節ですね。",
+        ]
+    elif month in (6, 7, 8):
+        seasonal_messages = [
+            "暑い日が続きます。どうぞ涼しくしてお過ごしください。",
+            "夏の日差しがまぶしい季節ですね。水分補給もお忘れなく。",
+            "今日も暑い一日でしたね。ゆっくりお休みください。",
+        ]
+    elif month in (9, 10, 11):
+        seasonal_messages = [
+            "秋の気配を感じる季節になりました。",
+            "朝夕の風が少しずつ涼しくなってきましたね。",
+            "実りの秋、コーヒーがいっそう美味しい季節ですね。",
+        ]
+    else:
+        seasonal_messages = [
+            "寒い日が続きます。暖かくしてお過ごしください。",
+            "温かいコーヒーがうれしい季節ですね。",
+            "冷え込む季節です。どうぞ暖かくしてお帰りください。",
+        ]
+
+    closing_messages = [
+        "今日も一日お疲れさまでした。",
+        "本日もお疲れさまでした。",
+        "今日もありがとうございました。ゆっくりお休みください。",
+        "お疲れさまでした。また次回もよろしくお願いします。",
+    ]
+
+    seasonal_message = secrets.choice(seasonal_messages)
+    closing_message = secrets.choice(closing_messages)
     session.clear()
-    flash("ログアウトしました。", "success")
-    return redirect(url_for("login"))
+
+    return render_template(
+        "login.html",
+        logged_out=True,
+        logout_name=employee_name,
+        seasonal_message=seasonal_message,
+        closing_message=closing_message,
+    )
 
 
 @app.route("/")
@@ -190,12 +252,23 @@ def stock():
     )
 
 
+@app.route("/settings/process-types")
+@admin_required
+def process_settings():
+    conn = get_db()
+    process_types = conn.execute(
+        "SELECT * FROM process_types ORDER BY rowid"
+    ).fetchall()
+    conn.close()
+    return render_template("process_settings.html", process_types=process_types)
+
+
 @app.route("/process-types/<process_code>/toggle", methods=["POST"])
-@login_required
+@admin_required
 def toggle_process_type(process_code):
     if process_code in ("IN", "CO", "DI"):
         flash("入荷・消費・廃棄は常時表示します。", "error")
-        return redirect(url_for("stock"))
+        return redirect(url_for("process_settings"))
 
     conn = get_db()
     process = conn.execute(
@@ -211,7 +284,7 @@ def toggle_process_type(process_code):
         conn.commit()
 
     conn.close()
-    return redirect(url_for("stock"))
+    return redirect(url_for("process_settings"))
 
 
 @app.route("/history")
@@ -397,8 +470,51 @@ def history_edit(transaction_id):
     return render_template("history_edit.html", transaction=transaction)
 
 
+@app.route("/employees/new", methods=["GET", "POST"])
+@admin_required
+def employee_new():
+    if request.method == "POST":
+        employee_id = request.form["employee_id"].strip().upper()
+        employee_name = request.form["employee_name"].strip()
+        password = request.form["password"]
+        role = request.form.get("role", "staff")
+
+        if not re.fullmatch(r"[A-Za-z0-9]+", employee_id):
+            flash("従業員IDは半角英数字で入力してください。", "error")
+            return render_template("employee_new.html")
+        if not re.fullmatch(r"[A-Za-z0-9]+", password):
+            flash("パスワードは半角英数字で入力してください。", "error")
+            return render_template("employee_new.html")
+        if not employee_name:
+            flash("氏名を入力してください。", "error")
+            return render_template("employee_new.html")
+        if role not in ("admin", "staff"):
+            role = "staff"
+
+        conn = get_db()
+        exists = conn.execute(
+            "SELECT 1 FROM employees WHERE employee_id = ?",
+            (employee_id,)
+        ).fetchone()
+        if exists:
+            conn.close()
+            flash("この従業員IDはすでに登録されています。", "error")
+            return render_template("employee_new.html")
+
+        conn.execute(
+            "INSERT INTO employees (employee_id, employee_name, password_hash, role) VALUES (?, ?, ?, ?)",
+            (employee_id, employee_name, generate_password_hash(password), role)
+        )
+        conn.commit()
+        conn.close()
+        flash(f"✓ {employee_id} {employee_name} を登録しました。", "success")
+        return redirect(url_for("home"))
+
+    return render_template("employee_new.html")
+
+
 @app.route("/products/new", methods=["GET", "POST"])
-@login_required
+@admin_required
 def product_new():
     if request.method == "POST":
         product_name = request.form["product_name"].strip()

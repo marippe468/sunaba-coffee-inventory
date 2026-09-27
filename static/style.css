@@ -668,3 +668,65 @@ td {
   .process-choice span { font-size:12px; }
   .detail-card, .filter-card { padding:17px 13px; }
 }
+
+/* ===== 統合仕上げ：配置・対比・管理メニュー ===== */
+.login-main { justify-content: flex-start; padding-top: 32px; }
+.logout-card { margin-top: 0; }
+.input-note { margin: -4px 0 18px; color:#6f5140; font-size:12px; line-height:1.7; }
+
+.detail-card .primary-button.button-link {
+  width: min(100%, 330px);
+  margin: 20px auto 0;
+  text-align: center;
+}
+
+.app-header { position:relative; overflow:visible; }
+.header-setting { position:relative; overflow:visible; }
+.setting-menu { position:relative; }
+.setting-menu > summary { display:flex; align-items:center; justify-content:center; width:32px; height:32px; margin:0; padding:0; list-style:none; cursor:pointer; color:#fff; border-radius:6px; }
+.setting-menu > summary::-webkit-details-marker { display:none; }
+.setting-menu > summary::marker { content:""; }
+.setting-menu[open] > summary, .setting-menu > summary:hover { background:rgba(255,255,255,.12); }
+.setting-panel { position:absolute; z-index:1000; top:38px; right:0; width:155px; padding:8px; border:1px solid #9a7a65; border-radius:7px; background:#fffaf0; box-shadow:0 6px 18px rgba(0,0,0,.18); text-align:left; }
+.setting-panel span { display:block; padding:8px 10px; color:#6f5140; font-size:12px; font-weight:700; border-bottom:1px solid #dfd0c5; }
+.setting-panel a { display:block; padding:9px 10px; color:#4f392d; font-size:12px; text-decoration:none; white-space:nowrap; border-radius:5px; }
+.setting-panel a:hover, .setting-panel a:focus { background:#f0e2d4; }
+
+/* 処理区分設定 */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #dccbbf;
+}
+.setting-row form { margin: 0; }
+.setting-note {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #805f4d;
+}
+.status-fixed {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6f5140;
+}
+.small-action-button {
+  min-width: 96px;
+  padding: 9px 12px;
+  border: 1px solid #8b6754;
+  border-radius: 6px;
+  background: #fffaf0;
+  color: #5b3c2d;
+  font-weight: 700;
+  cursor: pointer;
+}
+.small-action-button:hover { background: #f0e2d4; }
+.setting-section-gap { margin-top: 24px; }
+.block-button {
+  display: block;
+  margin-top: 24px;
+  text-align: center;
+  text-decoration: none;
+}

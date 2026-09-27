@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>従業員登録 | SUNABA COFFEE</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body><div class="app">
+<header class="app-header">
+  <div class="header-side"><span class="logo-mark"></span></div>
+  <div class="header-title"><h1>SUNABA COFFEE 在庫管理システム</h1><p>-SUNABA Inventory Management System(IMS)-</p><p id="current-date-time" data-employee-name="{{ session.get('employee_name', '') }}"></p></div>
+  <div class="header-side header-setting"><details class="setting-menu"><summary aria-label="設定">⚙</summary><div class="setting-panel"><span>{{ session.get("employee_name", "") }}</span>{% if session.get("role") == "admin" %}<a href="{{ url_for('product_new') }}">商品登録</a><a href="{{ url_for('employee_new') }}">従業員登録</a>
+        <a href="{{ url_for('process_settings') }}">処理区分設定</a>{% endif %}<a href="{{ url_for('logout') }}">ログアウト</a></div></details></div>
+</header>
+<main class="app-main"><h2>従業員登録</h2>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+<section class="form-card"><form method="POST">
+<div class="form-group"><label for="employee_id">従業員ID</label><input id="employee_id" name="employee_id" placeholder="例：E003" pattern="[A-Za-z0-9]+" title="半角英数字で入力してください" required></div>
+<div class="form-group"><label for="employee_name">氏名</label><input id="employee_name" name="employee_name" placeholder="氏名を入力" required></div>
+<div class="form-group"><label for="password">初期パスワード</label><input id="password" type="password" name="password" pattern="[A-Za-z0-9]+" title="半角英数字で入力してください" required></div>
+<div class="form-group"><label for="role">権限</label><select id="role" name="role"><option value="staff" selected>一般</option><option value="admin">管理者</option></select></div>
+<p class="input-note">※ 従業員ID・パスワードは半角英数字で入力してください。</p>
+<button class="primary-button" type="submit">従業員を登録</button><a class="secondary-button button-link" href="{{ url_for('home') }}">戻る</a>
+</form></section></main>
+<div class="bottom-area"><nav class="bottom-nav"><a href="{{ url_for('home') }}">TOP</a><a href="{{ url_for('home') }}">商品詳細</a><a href="{{ url_for('stock') }}">入出荷管理</a><a href="{{ url_for('history') }}">履歴管理</a></nav><footer class="app-footer"><span>@SUNABA COFFEE</span><span class="footer-divider">|</span><span>IMS</span></footer></div>
+</div><script>
+function updateDateTime(){const now=new Date();const months=["January","February","March","April","May","June","July","August","September","October","November","December"];const el=document.getElementById("current-date-time");if(el){const n=el.dataset.employeeName||"";el.textContent=`${now.getDate()} ${months[now.getMonth()]}, ${now.getFullYear()}  |  ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}  |  ログイン ${n}`;}}updateDateTime();setInterval(updateDateTime,60000);
+</script></body></html>

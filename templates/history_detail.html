@@ -14,14 +14,18 @@
   <div class="header-title">
     <h1>SUNABA COFFEE 在庫管理システム</h1>
     <p>-SUNABA Inventory Management System(IMS)-</p>
-    <p id="current-date-time"></p>
+    <p id="current-date-time" data-employee-name="{{ session.get('employee_name', '') }}"></p>
   </div>
   <div class="header-side header-setting">
     <details class="setting-menu">
       <summary aria-label="設定">⚙</summary>
       <div class="setting-panel">
         <span>{{ session.get("employee_name", "") }}</span>
+        {% if session.get("role") == "admin" %}
         <a href="{{ url_for('product_new') }}">商品登録</a>
+        <a href="{{ url_for('employee_new') }}">従業員登録</a>
+        <a href="{{ url_for('process_settings') }}">処理区分設定</a>
+        {% endif %}
         <a href="{{ url_for('logout') }}">ログアウト</a>
       </div>
     </details>
@@ -83,13 +87,20 @@
 <script>
 function updateDateTime() {
   const now = new Date();
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const d = now.getDate();
+  const month = months[now.getMonth()];
   const y = now.getFullYear();
-  const m = String(now.getMonth()+1).padStart(2,"0");
-  const d = String(now.getDate()).padStart(2,"0");
-  const h = String(now.getHours()).padStart(2,"0");
-  const min = String(now.getMinutes()).padStart(2,"0");
+  const h = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
   const el = document.getElementById("current-date-time");
-  if (el) el.textContent = `${y}/${m}/${d} | ${h}:${min}`;
+  if (el) {
+    const employeeName = el.dataset.employeeName || "";
+    el.textContent = `${d} ${month}, ${y}  |  ${h}:${min}  |  ログイン ${employeeName}`;
+  }
 }
 updateDateTime();
 setInterval(updateDateTime, 60000);

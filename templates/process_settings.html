@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>処理区分設定 | SUNABA COFFEE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* このページだけで完結させ、既存ページのCSSには影響させない */
+    html { background:#f3eee3; }
+    body.process-settings-page {
+      width:100%;
+      max-width:450px;
+      min-height:100vh;
+      margin:0 auto;
+      background:#fbf7eb;
+      color:#2f211b;
+      display:flex;
+      flex-direction:column;
+      overflow-x:hidden;
+    }
+    .ps-header {
+      background:#8b6754;
+      color:#fff;
+      padding:20px 14px 18px;
+    }
+    .ps-header-row {
+      display:grid;
+      grid-template-columns:32px 1fr 32px;
+      align-items:center;
+      gap:8px;
+    }
+    .ps-logo {
+      width:17px; height:35px;
+      border-radius:3px;
+      background:#ef5145;
+    }
+    .ps-brand { min-width:0; text-align:center; }
+    .ps-title {
+      font-size:15px; font-weight:700;
+      white-space:nowrap;
+    }
+    .ps-sub { margin-top:5px; font-size:9px; }
+    .ps-meta { margin-top:5px; font-size:9px; white-space:nowrap; }
+    .ps-setting { position:relative; text-align:center; }
+    .ps-setting summary {
+      list-style:none; cursor:pointer; font-size:17px;
+    }
+    .ps-setting summary::-webkit-details-marker { display:none; }
+    .ps-menu {
+      position:absolute; z-index:50;
+      top:28px; right:0;
+      width:145px;
+      padding:7px;
+      border:1px solid #805f4d;
+      border-radius:8px;
+      background:#fffaf0;
+      box-shadow:0 6px 18px rgba(0,0,0,.18);
+      text-align:left;
+    }
+    .ps-menu span, .ps-menu a {
+      display:block;
+      padding:9px 10px;
+      color:#4f3427;
+      font-size:12px;
+      text-decoration:none;
+    }
+    .ps-menu span { font-weight:700; border-bottom:1px solid #dccbbf; }
+
+    .ps-main {
+      flex:1;
+      padding:28px 10px 40px;
+      background:
+        linear-gradient(rgba(251,247,235,.88),rgba(251,247,235,.88)),
+        url("{{ url_for('static', filename='images/coffee-bg.png') }}") center/cover fixed;
+    }
+    .ps-main h1 {
+      margin:0 0 24px;
+      text-align:center;
+      font-size:24px;
+    }
+    .ps-card {
+      padding:18px;
+      border:1px solid #a77c64;
+      border-radius:7px;
+      background:rgba(255,252,244,.90);
+    }
+    .ps-card h2 {
+      margin:0 0 8px;
+      font-size:17px;
+    }
+    .ps-card h2.ps-gap { margin-top:25px; }
+    .ps-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:13px 0;
+      border-bottom:1px solid #dccbbf;
+    }
+    .ps-name { font-weight:700; font-size:14px; }
+    .ps-note { margin-top:4px; font-size:11px; color:#805f4d; }
+    .ps-fixed { font-size:12px; font-weight:700; color:#6f5140; }
+    .ps-row form { margin:0; flex:0 0 auto; }
+    .ps-toggle {
+      min-width:100px;
+      padding:9px 10px;
+      border:1px solid #8b6754;
+      border-radius:5px;
+      background:#fff;
+      color:#5b3c2d;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .ps-back {
+      display:block;
+      box-sizing:border-box;
+      width:100%;
+      margin-top:22px;
+      padding:12px;
+      border:1px solid #8b6754;
+      border-radius:5px;
+      background:#fff;
+      color:#5b3c2d;
+      text-align:center;
+      text-decoration:none;
+      font-weight:700;
+    }
+    .ps-footer {
+      background:#8b6754;
+      color:#fff;
+      padding:18px 10px;
+      text-align:center;
+      font-size:12px;
+      font-weight:700;
+    }
+    .flash-message {
+      margin:0 0 14px;
+      padding:12px;
+      border-radius:6px;
+      font-size:13px;
+    }
+    .flash-message.success { border:1px solid #71866a; background:#eef4ea; }
+    .flash-message.error { border:1px solid #c65a4a; background:#fff0ed; color:#a13e31; }
+    @media (max-width:380px) {
+      .ps-title { font-size:13px; }
+      .ps-sub, .ps-meta { font-size:8px; }
+      .ps-card { padding:15px; }
+      .ps-toggle { min-width:92px; font-size:12px; }
+    }
+  </style>
+</head>
+<body class="process-settings-page">
+<header class="ps-header">
+  <div class="ps-header-row">
+    <div class="ps-logo"></div>
+    <div class="ps-brand">
+      <div class="ps-title">SUNABA COFFEE 在庫管理システム</div>
+      <div class="ps-sub">-SUNABA Inventory Management System(IMS)-</div>
+      <div class="ps-meta"><span id="ps-current-datetime"></span> | ログイン {{ session.get("employee_name") }}</div>
+    </div>
+    <details class="ps-setting">
+      <summary aria-label="設定">⚙</summary>
+      <div class="ps-menu">
+        <span>{{ session.get("employee_name") }}</span>
+        <a href="{{ url_for('product_new') }}">商品登録</a>
+        <a href="{{ url_for('employee_new') }}">従業員登録</a>
+        <a href="{{ url_for('process_settings') }}">処理区分設定</a>
+        <a href="{{ url_for('logout') }}">ログアウト</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+<main class="ps-main">
+  <h1>処理区分設定</h1>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <section class="ps-card">
+    <h2>基本区分</h2>
+    {% for process in process_types %}
+      {% if process["process_code"] in ["IN", "CO", "DI"] %}
+      <div class="ps-row">
+        <div>
+          <div class="ps-name">{{ process["process_name"] }}</div>
+          <div class="ps-note">常時使用</div>
+        </div>
+        <span class="ps-fixed">固定</span>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <h2 class="ps-gap">追加区分</h2>
+    {% for process in process_types %}
+      {% if process["process_code"] in ["RT", "AD", "DM"] %}
+      <div class="ps-row">
+        <div>
+          <div class="ps-name">{{ process["process_name"] }}</div>
+          <div class="ps-note">{% if process["is_visible"] %}入出荷画面に表示中{% else %}現在は非表示{% endif %}</div>
+        </div>
+        <form method="POST" action="{{ url_for('toggle_process_type', process_code=process['process_code']) }}">
+          <button class="ps-toggle" type="submit">
+            {% if process["is_visible"] %}非表示にする{% else %}表示する{% endif %}
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <a class="ps-back" href="{{ url_for('home') }}">戻る</a>
+  </section>
+</main>
+
+<footer class="ps-footer">@SUNABA COFFEE　｜　IMS</footer>
+<script>
+(function () {
+  const el = document.getElementById("ps-current-datetime");
+  if (!el) return;
+  const months = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+  function updateDateTime() {
+    const now = new Date();
+    const date = now.getDate() + " " + months[now.getMonth()] + ", " + now.getFullYear();
+    const time = String(now.getHours()).padStart(2, "0") + ":" +
+                 String(now.getMinutes()).padStart(2, "0");
+    el.textContent = date + " | " + time;
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 30000);
+})();
+</script>
+</body>
+</html>
